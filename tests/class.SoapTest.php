@@ -1,6 +1,12 @@
 <?php
 namespace MakingWaves\eZLumesse\Tests;
 
+/**
+ * Class SoapTest
+ * Class contains tests for Soap class. Can be run by:
+ * $ php tests/runtests.php --dsn mysql://root:pass@localhost/db_name --filter="SoapTest" --db-per-test
+ * @package MakingWaves\eZLumesse\Tests
+ */
 class SoapTest extends EzLumesseTests
 {
     /**
@@ -58,5 +64,31 @@ class SoapTest extends EzLumesseTests
         $property->setAccessible( true );
 
         $this->assertNotEmpty( $property->getValue( new $this->test_class ) );
+    }
+
+    /**
+     * @dataProvider providerEmptyOrIncorrectString
+     * @expectedException \MakingWaves\eZLumesse\SoapIncorrectFunctionNameException
+     */
+    public function testCallIncorrectFunction( $input )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+
+        $object = new $this->test_class;
+        $object->call( $input, 'correct string' );
+    }
+
+    /**
+     * @expectedException \MakingWaves\eZLumesse\SoapIncorrectArgumentsException
+     * @dataProvider providerIncorrectStringType
+     */
+    public function testCallIncorrectArguments( $input )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+
+        $object = new $this->test_class;
+        $object->call( 'correct string', $input );
     }
 }

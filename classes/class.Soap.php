@@ -1,6 +1,12 @@
 <?php
 namespace MakingWaves\eZLumesse;
 
+/**
+ * Class Soap
+ * This class is unit tested by tests/class.SoapTest.php, so in case
+ * of implementing new methods, please implement tests as well.
+ * @package MakingWaves\eZLumesse\Tests
+ */
 class Soap
 {
     /**
@@ -42,7 +48,32 @@ class Soap
     }
 
     /**
+     * Method makes a call to given SOAP function
+     *
+     * @param string $function_name
+     * @param string $arguments
+     * @return mixed
+     * @throws SoapIncorrectArgumentsException
+     * @throws SoapIncorrectFunctionNameException
+     */
+    public function call( $function_name, $arguments )
+    {
+        if ( !is_string( $function_name ) || strlen( $function_name ) <= 0 ) {
+            throw new SoapIncorrectFunctionNameException( 'Function name needs to be a non empty string' );
+        }
+        
+        if ( !is_string( $arguments ) ) {
+            throw new SoapIncorrectArgumentsException();
+        }
+        
+        return $this->getConnectionHandler()->__call(
+            $function_name, $arguments
+        );
+    }
+
+    /**
      * Method connects to the soap service and as a result returns SoapClient
+     *
      * @throws SoapConnectionException
      * @return \SoapClient
      */
@@ -72,6 +103,7 @@ class Soap
 
     /**
      * Loading required ini settings. Some of them (username, password) depends on environment
+     *
      * @throws SoapMissingEnvironmentException
      * @throws SoapMissingUsernameException
      * @throws SoapMissingPasswordException

@@ -1,6 +1,9 @@
 <?php
 namespace MakingWaves\eZLumesse\Tests;
 
+/**
+ * Parent class for all test classes inside eZLumesse extension
+ */
 abstract class EzLumesseTests extends \ezpDatabaseTestCase
 {
     /**
@@ -48,6 +51,28 @@ abstract class EzLumesseTests extends \ezpDatabaseTestCase
     {
         return array(
             array( 'api_key' ), array( 'api_endpoint' ), array( 'username' ), array( 'password' ), array( 'namespace' )
+        );
+    }
+
+    /**
+     * Returns the elements which are incorrect strings
+     * @return array
+     */
+    public function providerIncorrectStringType()
+    {
+        return array(
+            array( 1 ), array( 0 ), array( -1 ), array( null ), array( true ), array( false ), array( array() ), array( 1.3 )
+        );
+    }
+
+    /**
+     * Returns the elements which are empty or incorrect strings
+     * @return array
+     */
+    public function providerEmptyOrIncorrectString()
+    {
+        return array_merge(
+            $this->providerIncorrectStringType(), array( array( '' ) )
         );
     }
 }
