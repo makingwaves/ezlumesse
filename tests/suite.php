@@ -14,6 +14,7 @@ class EzLumesseTestSuite extends \ezpDatabaseTestSuite
 
         // Adding tests
         $this->addTestSuite( 'MakingWaves\eZLumesse\Tests\SoapTest' );
+        $this->addTestSuite( 'MakingWaves\eZLumesse\Tests\HandlerLogicTest' );
     }
 
     public static function suite()

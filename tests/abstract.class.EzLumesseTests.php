@@ -75,4 +75,83 @@ abstract class EzLumesseTests extends \ezpDatabaseTestCase
             $this->providerIncorrectStringType(), array( array( '' ) )
         );
     }
+
+    /**
+     * Returns the signed integers which are less or equal 100
+     * @return array
+     */
+    public function providerSignedIntegersLessOrEqual100()
+    {
+        return array(
+            array( 1 ), array( '1' ), array( 100 ), array( '100' )
+        );
+    }
+
+    /**
+     * Returns the elements which are not integers or they are correct integers, but out of range 0-100
+     * @return array
+     */
+    public function providerIntegerIncorrectOrOutOfRange()
+    {
+        return array(
+            array( 0 ), array( '0' ), array( -10 ), array( 10.5 ), array( 'test' ), array( 101 ), array( null ), array( array() )
+        );
+    }
+
+    /**
+     * Returns a set of correct values defined as attributes of function getNextPage.
+     * As a result of those values we should get "true"
+     * @return array
+     */
+    public function providerNextPageCounterValues()
+    {
+        return array(
+            array( 1, 100, 110 ), array( 3, 50, 151 ), array( 4, 100 ,554 )
+        );
+    }
+
+    /**
+     * Returns a set of correct values defined as attributes of function getNextPage.
+     * As a result of those values we should get "false"
+     * @return array
+     */
+    public function providerThereIsNoNextPage()
+    {
+        return array(
+            array( 100, 100, 90 ), array( 200, 100, 150 ), array( 150, 50, 150 )
+        );
+    }
+
+    /**
+     * Returns a set of values, where one of the value is not correct signed integer
+     * @return array
+     */
+    public function providerIncorrectIntegerInSet()
+    {
+        return array(
+            array( -1, 1, '2' ) , array( 1, 2, 'test' ), array( 0, 0, 0 ), array( 1, 2, null ), array( 3, 1.5, 5 )
+        );
+    }
+
+    /**
+     * Returns correct integers or arrays containing correct integers
+     * @return array
+     */
+    public function providerCorrectIntegerSets()
+    {
+        return array(
+            array( 1 ), array( '2' ), array( array( 1, 2 ) ), array( array( '1', '2' ) ), array( array( 'test' => 1, 'key' => '2' ) )
+        );
+    }
+
+    /**
+     * Returns incorrect integers or arrays containing at least one incorrect integer
+     * @return array
+     */
+    public function providerIncorrectIntegerSets()
+    {
+        return array(
+            array( -1 ), array( 1.2 ), array( 'test' ), array( array( 1, 'test' ) )
+        );
+    }
 }

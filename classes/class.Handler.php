@@ -10,12 +10,18 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
     const HANDLER_NAME = 'eZLumesse integration';
 
     /**
+     * @var HandlerLogic
+     */
+    private $handler_logic;
+
+    /**
      * Constructor
      * @param \SQLIImportHandlerOptions $options
      */
     public function __construct( \SQLIImportHandlerOptions $options = null )
     {
         parent::__construct( $options );
+        $this->handler_logic = new HandlerLogic();
     }
 
     /**
@@ -24,12 +30,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function initialize()
     {
-        $soap = new Soap();
-
-        $data = $soap->ws->__call( 'getAdvertisements', array(  ) );
-        print '<pre>';
-        print_r($data);
-        print '</pre>';
+        $this->handler_logic->getAllAds();
     }
 
     /**
@@ -40,7 +41,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function getProcessLength()
     {
-        return 1;
+        return $this->handler_logic->getProcessLength();
     }
 
     /**
@@ -60,7 +61,9 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function process( $row )
     {
-
+        print '<pre>';
+        var_dump($row);
+        print '</pre>';
     }
 
     /**

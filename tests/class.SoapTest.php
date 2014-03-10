@@ -44,7 +44,6 @@ class SoapTest extends EzLumesseTests
         return $method;
     }
 
-
     /**
      * @dataProvider providerSoapConfigurationProperties
      */
@@ -76,19 +75,6 @@ class SoapTest extends EzLumesseTests
         $this->setIniSettings();
 
         $object = new $this->test_class;
-        $object->call( $input, 'correct string' );
-    }
-
-    /**
-     * @expectedException \MakingWaves\eZLumesse\SoapIncorrectArgumentsException
-     * @dataProvider providerIncorrectStringType
-     */
-    public function testCallIncorrectArguments( $input )
-    {
-        // apply ini settings
-        $this->setIniSettings();
-
-        $object = new $this->test_class;
-        $object->call( 'correct string', $input );
+        $object->call( $input );
     }
 }

@@ -51,22 +51,17 @@ class Soap
      * Method makes a call to given SOAP function
      *
      * @param string $function_name
-     * @param string $arguments
+     * @param array $arguments
      * @return mixed
-     * @throws SoapIncorrectArgumentsException
      * @throws SoapIncorrectFunctionNameException
      */
-    public function call( $function_name, $arguments )
+    public function call( $function_name, array $arguments = array() )
     {
         if ( !is_string( $function_name ) || strlen( $function_name ) <= 0 ) {
             throw new SoapIncorrectFunctionNameException( 'Function name needs to be a non empty string' );
         }
         
-        if ( !is_string( $arguments ) ) {
-            throw new SoapIncorrectArgumentsException();
-        }
-        
-        return $this->getConnectionHandler()->__call(
+        return $this->getConnectionHandler()->__soapCall(
             $function_name, $arguments
         );
     }
