@@ -17,7 +17,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings, however they're incorrect at this point
         $this->setIniSettings();
 
-        $object = new $this->test_class;
+        $object = new $this->test_class( $this->getOptions() );
         $result = $object->getAllAds();
 
         $this->assertTrue( is_array( $result ) );
@@ -42,7 +42,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $value = $property->getValue( new $this->test_class );
+        $value = $property->getValue( new $this->test_class( $this->getOptions() ) );
         $this->assertInstanceof( '\MakingWaves\eZLumesse\Soap', $value );
     }
 
@@ -62,7 +62,7 @@ class HandlerLogicTest extends EzLumesseTests
             )
         ) );
 
-        $result = $method->invoke( new $this->test_class );
+        $result = $method->invoke( new $this->test_class( $this->getOptions() ) );
         $this->assertGreaterThan( 0, $result );
         $this->assertLessThanOrEqual( 100, $result );
     }
@@ -83,7 +83,7 @@ class HandlerLogicTest extends EzLumesseTests
             )
         ) );
 
-        $method->invoke( new $this->test_class );
+        $method->invoke( new $this->test_class( $this->getOptions() ) );
     }
 
     /**
@@ -97,7 +97,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $this->assertTrue( $method->invoke( new $this->test_class, $current_page, $items_per_page, $all_items ) );
+        $this->assertTrue( $method->invoke( new $this->test_class( $this->getOptions() ), $current_page, $items_per_page, $all_items ) );
     }
 
     /**
@@ -111,7 +111,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $this->assertFalse( $method->invoke( new $this->test_class, $current_page, $items_per_page, $all_items ) );
+        $this->assertFalse( $method->invoke( new $this->test_class( $this->getOptions() ), $current_page, $items_per_page, $all_items ) );
     }
 
     /**
@@ -126,7 +126,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $method->invoke( new $this->test_class, $current_page, $items_per_page, $all_items );
+        $method->invoke( new $this->test_class( $this->getOptions() ), $current_page, $items_per_page, $all_items );
     }
 
     /**
@@ -140,7 +140,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $this->assertTrue( $method->invoke( new $this->test_class, $input ) );
+        $this->assertTrue( $method->invoke( new $this->test_class( $this->getOptions() ), $input ) );
     }
 
     /**
@@ -154,7 +154,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $this->assertFalse( $method->invoke( new $this->test_class, $input ) );
+        $this->assertFalse( $method->invoke( new $this->test_class( $this->getOptions() ), $input ) );
     }
 
     /**
@@ -168,7 +168,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $this->assertEquals( 0, sizeof( $method->invoke( new $this->test_class ) ) );
+        $this->assertEquals( 0, sizeof( $method->invoke( new $this->test_class( $this->getOptions() ) ) ) );
     }
 
     public function testGetProcessLengthNoObject()
@@ -176,7 +176,7 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $object = new $this->test_class;
+        $object = new $this->test_class( $this->getOptions() );
         $property = new \ReflectionProperty( $this->test_class, 'process_length' );
         $property->setAccessible( true );
 
@@ -192,7 +192,133 @@ class HandlerLogicTest extends EzLumesseTests
         // apply ini settings
         $this->setIniSettings();
 
-        $object = new $this->test_class;
+        $object = new $this->test_class( $this->getOptions() );
         $object->getProcessLEngth( new \stdClass() );
+    }
+
+    /**
+     * Test for option language getter
+     */
+    public function testGetLanguage()
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'getLanguage' );
+        $method->setAccessible( true );
+
+        $property = new \ReflectionProperty( $this->test_class, 'lang' );
+        $property->setAccessible( true );
+
+        $this->assertEquals( $property->getValue( $object ), $method->invoke( $object ) );
+    }
+
+    /**
+     * @dataProvider providerCorrectLanguageCodeDefinedInIni
+     */
+    public function testGetLumesseLanguage( $lang_code )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'getLumesseLanguage' );
+        $method->setAccessible( true );
+
+        $result = $method->invoke( $object, $lang_code );
+        $this->assertGreaterThan( 0, strlen( $result ) );
+    }
+
+    /**
+     * @dataProvider providerIncorrectLanguageCode
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectLanguageCodeException
+     */
+    public function testGetLumesseLanguageIncorrect( $lang_code )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'getLumesseLanguage' );
+        $method->setAccessible( true );
+        $method->invoke( $object, $lang_code );
+    }
+
+    /**
+     * @dataProvider providerIncorrectStringType
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectXmlStringException
+     */
+    public function testStringToXmlblockIncorrectString( $string )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'stringToXmlblock' );
+        $method->setAccessible( true );
+        $method->invoke( $object, $string, 1 );
+    }
+
+    /**
+     * @dataProvider providerIncorrectObjectId
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectObjectIdException
+     */
+    public function testStringtoXmlblockIncorrectObjectId( $id )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'stringToXmlblock' );
+        $method->setAccessible( true );
+        $method->invoke( $object, 'test', $id );
+    }
+
+    /**
+     * @dataProvider providerCorrectDateString
+     */
+    public function testDateToTimestamp( $date_time )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
+        $method->setAccessible( true );
+        $result = $method->invoke( $object, $date_time );
+
+        $this->assertGreaterThan( 0, filter_var( $result, FILTER_VALIDATE_INT ) );
+        $this->assertGreaterThan( 0, strlen( $result ) );
+    }
+
+    /**
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectDateFormatException
+     * @dataProvider providerIncorrectDateString
+     */
+    public function testDateToTimestampIncorrectFormat( $date_time )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
+        $method->setAccessible( true );
+        $method->invoke( $object, $date_time );
+    }
+
+    /**
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectTimestampException
+     * @dataProvider providerIncorrectStringForTimestamp
+     */
+    public function testDateToTimestampIncorrectTimestamp( $date_time )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
+        $method->setAccessible( true );
+        $method->invoke( $object, $date_time );
     }
 }

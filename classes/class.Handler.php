@@ -21,7 +21,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
     public function __construct( \SQLIImportHandlerOptions $options = null )
     {
         parent::__construct( $options );
-        $this->handler_logic = new HandlerLogic();
+        $this->handler_logic = new HandlerLogic( $options );
     }
 
     /**
@@ -51,7 +51,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function getNextRow()
     {
-
+        return $this->handler_logic->getNextRow();
     }
 
     /**
@@ -61,9 +61,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function process( $row )
     {
-        print '<pre>';
-        var_dump($row);
-        print '</pre>';
+        $this->handler_logic->processRow( $row );
     }
 
     /**

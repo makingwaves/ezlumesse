@@ -45,6 +45,7 @@ class Soap
     public function __construct()
     {
         $this->loadSettings();
+        $this->handler = $this->getConnectionHandler();
     }
 
     /**
@@ -61,50 +62,15 @@ class Soap
             throw new SoapIncorrectFunctionNameException( 'Function name needs to be a non empty string' );
         }
         
-        return $this->getConnectionHandler()->__soapCall(
+        return $this->handler->__soapCall(
             $function_name, $arguments
         );
-    }
-
-    /**
-     * Method connects to the soap service and as a result returns SoapClient
-     *
-     * @throws SoapConnectionException
-     * @return \SoapClient
-     */
-    private function getConnectionHandler()
-    {
-        if ( is_null( $this->handler ) ) {
-
-            $soapVar_Auth = new \SoapVar( array(
-                'Username' => new \SoapVar( $this->username, XSD_STRING, null, $this->namespace, null, $this->namespace ),
-                'Password' => new \SoapVar( $this->password, XSD_STRING, null, $this->namespace, null, $this->namespace )
-            ), SOAP_ENC_OBJECT, null, $this->namespace, 'UsernameToken', $this->namespace );
-
-            $soapVar_Auth_Token = new \SoapVar( array(
-                'UsernameToken' => $soapVar_Auth
-            ), SOAP_ENC_OBJECT, null, $this->namespace, 'UsernameToken', $this->namespace );
-
-            $soapVar_Security = new \SoapVar( $soapVar_Auth_Token, SOAP_ENC_OBJECT, null, $this->namespace, 'Security', $this->namespace );
-            $soapVar_Header = new \SoapHeader( $this->namespace, 'Security', $soapVar_Security, true, 'TlkPrincipal' );
-
-            $this->handler = new \SoapClient( $this->api_endpoint . '?wsdl' );
-            $this->handler->__setSoapHeaders( array( $soapVar_Header ) );
-            $this->handler->__setLocation( $this->api_endpoint . '?api_key=' . $this->api_key );
-        }
-
-        return $this->handler;
     }
 
     /**
      * Loading required ini settings. Some of them (username, password) depends on environment
      *
      * @throws SoapMissingEnvironmentException
-     * @throws SoapMissingUsernameException
-     * @throws SoapMissingPasswordException
-     * @throws SoapMissingApiEndpointException
-     * @throws SoapMissingApiKeyException
-     * @throws SoapMissingNamespaceException
      */
     private function loadSettings()
     {
@@ -119,5 +85,31 @@ class Soap
         $this->namespace = $ini->variable( 'MainSettings', 'Namespace' );
         $this->username = $ini->variable( $environment . '-Environment', 'UserName' );
         $this->password = $ini->variable( $environment . '-Environment', 'Password' );
+    }
+
+    /**
+     * Method connects to the soap service and as a result returns SoapClient
+     *
+     * @return \SoapClient
+     */
+    private function getConnectionHandler()
+    {
+        $soapVar_Auth = new \SoapVar( array(
+            'Username' => new \SoapVar( $this->username, XSD_STRING, null, $this->namespace, null, $this->namespace ),
+            'Password' => new \SoapVar( $this->password, XSD_STRING, null, $this->namespace, null, $this->namespace )
+        ), SOAP_ENC_OBJECT, null, $this->namespace, 'UsernameToken', $this->namespace );
+
+        $soapVar_Auth_Token = new \SoapVar( array(
+            'UsernameToken' => $soapVar_Auth
+        ), SOAP_ENC_OBJECT, null, $this->namespace, 'UsernameToken', $this->namespace );
+
+        $soapVar_Security = new \SoapVar( $soapVar_Auth_Token, SOAP_ENC_OBJECT, null, $this->namespace, 'Security', $this->namespace );
+        $soapVar_Header = new \SoapHeader( $this->namespace, 'Security', $soapVar_Security, true, 'TlkPrincipal' );
+
+        $handler = new \SoapClient( $this->api_endpoint . '?wsdl' );
+        $handler->__setSoapHeaders( array( $soapVar_Header ) );
+        $handler->__setLocation( $this->api_endpoint . '?api_key=' . $this->api_key );
+
+        return $handler;
     }
 }

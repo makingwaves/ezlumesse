@@ -7,6 +7,17 @@ namespace MakingWaves\eZLumesse\Tests;
 abstract class EzLumesseTests extends \ezpDatabaseTestCase
 {
     /**
+     * @return \SQLIImportHandlerOptions
+     */
+    protected function getOptions()
+    {
+        $options = new \SQLIImportHandlerOptions();
+        $options->test = 'test_value';
+
+        return $options;
+    }
+
+    /**
      * Method sets the ini settings
      * @param bool $load_original
      * @param array $custom_settings
@@ -152,6 +163,72 @@ abstract class EzLumesseTests extends \ezpDatabaseTestCase
     {
         return array(
             array( -1 ), array( 1.2 ), array( 'test' ), array( array( 1, 'test' ) )
+        );
+    }
+
+    /**
+     * Returns correct language codes - same as are defined in extension ini settings
+     * @return array
+     */
+    public function providerCorrectLanguageCodeDefinedInIni()
+    {
+        return array(
+            array( 'nor-NO' ), array( 'eng-GB' )
+        );
+    }
+
+    /**
+     * Returns a set of language codes which are not defined in extension ini settings
+     * @return array
+     */
+    public function providerIncorrectLanguageCode()
+    {
+        return array(
+            array( 'some-LANG' ), array( 'test-TE' )
+        );
+    }
+
+    /**
+     * Returns the elements which are incorrect object ids
+     * @return array
+     */
+    public function providerIncorrectObjectId()
+    {
+        return array(
+            array( '' ), array( false ), array( null ), array( array() ), array( 'test' ), array( -1 ), array( '-2' ), array( 1.2 )
+        );
+    }
+
+    /**
+     * Returns the strings which are correct dates in format YYYY-MM-DD
+     * @return array
+     */
+    public function providerCorrectDateString()
+    {
+        return array(
+            array( '1985-12-05' ), array( '2014-09-30' )
+        );
+    }
+
+    /**
+     * Returns the strings which are incorrect dates
+     * @return array
+     */
+    public function providerIncorrectDateString()
+    {
+        return array(
+            array( 'test' ), array( '1985-13' ), array( '20-04-2012' )
+        );
+    }
+
+    /**
+     * Returns the elements which cannot be the base for timestamp, because of logical conflicts
+     * @return array
+     */
+    public function providerIncorrectStringForTimestamp()
+    {
+        return array(
+            array( '1960-01-01' ), array( '2013-13-13' )
         );
     }
 }

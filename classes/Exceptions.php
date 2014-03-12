@@ -14,3 +14,8 @@ class HandlerLogicConnectionFailureException extends \Exception {}
 class HandlerLogicIncorrectRangeException extends \Exception {}
 class HandlerLogicIncorrectIntegersException extends \Exception {}
 class HandlerLogicTotalResultsMissingException extends \Exception {}
+class HandlerLogicIncorrectLanguageCodeException extends \Exception {}
+class HandlerLogicIncorrectXmlStringException extends \Exception {}
+class HandlerLogicIncorrectObjectIdException extends \Exception {}
+class HandlerLogicIncorrectDateFormatException extends \Exception {}
+class HandlerLogicIncorrectTimestampException extends \Exception {}
