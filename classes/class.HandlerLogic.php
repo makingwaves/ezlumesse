@@ -57,17 +57,15 @@ class HandlerLogic
             'class_identifier' => 'lumesse_offer',
             'language' => $this->lang
         ) ) );
-//
-//        $date_time = explode( 'T', $row->postingStartDate );
-//        print '<pre>';
-//        var_dump(strtotime( $date_time[0] ));
-//        print '</pre>';die;
 
         $object->fields[$this->lang]->name = $row->jobTitle;
         $object->fields[$this->lang]->url = $row->applicationUrl;
         $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
         $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
-        $object->fields[$this->lang]->commence = '1221672010';
+        $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
+        $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
+        $object->fields[$this->lang]->schedule_type = $this->getStandardLov( $row, 'ScheduleType' );
+        $object->fields[$this->lang]->type_of_employment = $this->getStandardLov( $row, 'ContractType' );
 
         $folder_publisher = \SQLIContentPublisher::getInstance();
         $folder_publisher->setOptions( new \SQLIContentPublishOptions( array(
@@ -113,12 +111,10 @@ class HandlerLogic
         }
 
         $timestamp = strtotime( $date_time[0] );
-        if ( $timestamp === false ) {
+        if ( $timestamp === false || $timestamp < 0 ) {
             throw new HandlerLogicIncorrectTimestampException();
         }
-print '<pre>';
-var_dump($timestamp);
-print '</pre>';
+
         return $timestamp;
     }
 
@@ -173,10 +169,6 @@ print '</pre>';
         if ( sizeof( $this->data ) === 0 ) {
             $this->data = $this->getAdPage();
         }
-
-//        foreach( $this->data as $item ) {
-//            print $item->id . "\n";
-//        }
 
         return $this->data;
     }
@@ -237,7 +229,12 @@ print '</pre>';
      */
     public function getNextRow()
     {
-        $return = $this->data[key( $this->data )];
+        $key = key( $this->data );
+        if( is_null( $key ) ) {
+            return null;
+        }
+
+        $return = $this->data[$key];
         next( $this->data );
 
         return $return;
@@ -263,6 +260,32 @@ print '</pre>';
         }
 
         return $this->process_length;
+    }
+
+    /**
+     * Returns a value of given standard lov identifier
+     *
+     * @param \stdClass $row
+     * @param $identifier
+     * @return mixed
+     * @throws HandlerLogicIncorrectLovIdentifierException
+     * @throws HandlerLogicLovDoesNotExistException
+     */
+    private function getStandardLov( \stdClass $row, $identifier )
+    {
+        if ( !is_string( $identifier ) ) {
+            throw new HandlerLogicIncorrectLovIdentifierException();
+        }
+
+        if ( isset( $row->standardLovs ) ) {
+            foreach( $row->standardLovs->standardLov as $item ) {
+                if ( $item->value === $identifier && isset( $item->criteria->criterion->label ) ) {
+                    return $item->criteria->criterion->label;
+                }
+            }
+        }
+
+        throw new HandlerLogicLovDoesNotExistException();
     }
 
     /**

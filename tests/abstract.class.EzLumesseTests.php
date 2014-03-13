@@ -7,6 +7,23 @@ namespace MakingWaves\eZLumesse\Tests;
 abstract class EzLumesseTests extends \ezpDatabaseTestCase
 {
     /**
+     * Reflects to the private method of the object.
+     * @param string $method_name
+     * @param array $method_args
+     * @return mixed
+     */
+    protected function callPrivateMethod( $method_name, array $method_args )
+    {
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions() );
+
+        $method = new \ReflectionMethod( $this->test_class, $method_name );
+        $method->setAccessible( true );
+        return $method->invokeArgs( $object, $method_args );
+    }
+
+    /**
      * @return \SQLIImportHandlerOptions
      */
     protected function getOptions()
@@ -206,7 +223,7 @@ abstract class EzLumesseTests extends \ezpDatabaseTestCase
     public function providerCorrectDateString()
     {
         return array(
-            array( '1985-12-05' ), array( '2014-09-30' )
+            array( '1985-12-05' ), array( '2014-09-30' ), array( '2014-03-20T00:00:00+01:00' )
         );
     }
 

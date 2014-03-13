@@ -7,7 +7,7 @@ class HandlerLogicTest extends EzLumesseTests
      * A name of class which is tested here
      * @var string
      */
-    private $test_class = 'MakingWaves\eZLumesse\HandlerLogic';
+    protected $test_class = 'MakingWaves\eZLumesse\HandlerLogic';
 
     /**
      * Trying to get all ads, but correct credential are missing, so we should have an empty array here
@@ -219,14 +219,10 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testGetLumesseLanguage( $lang_code )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
+        $result = $this->callPrivateMethod( 'getLumesseLanguage', array(
+            $lang_code
+        ) );
 
-        $method = new \ReflectionMethod( $this->test_class, 'getLumesseLanguage' );
-        $method->setAccessible( true );
-
-        $result = $method->invoke( $object, $lang_code );
         $this->assertGreaterThan( 0, strlen( $result ) );
     }
 
@@ -236,13 +232,9 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testGetLumesseLanguageIncorrect( $lang_code )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
-
-        $method = new \ReflectionMethod( $this->test_class, 'getLumesseLanguage' );
-        $method->setAccessible( true );
-        $method->invoke( $object, $lang_code );
+        $this->callPrivateMethod( 'getLumesseLanguage', array(
+            $lang_code
+        ) );
     }
 
     /**
@@ -251,13 +243,10 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testStringToXmlblockIncorrectString( $string )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
-
-        $method = new \ReflectionMethod( $this->test_class, 'stringToXmlblock' );
-        $method->setAccessible( true );
-        $method->invoke( $object, $string, 1 );
+        $this->callPrivateMethod( 'stringToXmlblock', array(
+            $string,
+            1
+        ) );
     }
 
     /**
@@ -266,13 +255,10 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testStringtoXmlblockIncorrectObjectId( $id )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
-
-        $method = new \ReflectionMethod( $this->test_class, 'stringToXmlblock' );
-        $method->setAccessible( true );
-        $method->invoke( $object, 'test', $id );
+        $this->callPrivateMethod( 'stringToXmlblock', array(
+            'test',
+            $id
+        ) );
     }
 
     /**
@@ -280,13 +266,9 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testDateToTimestamp( $date_time )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
-
-        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
-        $method->setAccessible( true );
-        $result = $method->invoke( $object, $date_time );
+        $result = $this->callPrivateMethod( 'dateToTimestamp', array(
+            $date_time
+        ) );
 
         $this->assertGreaterThan( 0, filter_var( $result, FILTER_VALIDATE_INT ) );
         $this->assertGreaterThan( 0, strlen( $result ) );
@@ -298,13 +280,9 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testDateToTimestampIncorrectFormat( $date_time )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
-
-        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
-        $method->setAccessible( true );
-        $method->invoke( $object, $date_time );
+        $this->callPrivateMethod( 'dateToTimestamp', array(
+            $date_time
+        ) );
     }
 
     /**
@@ -313,12 +291,31 @@ class HandlerLogicTest extends EzLumesseTests
      */
     public function testDateToTimestampIncorrectTimestamp( $date_time )
     {
-        // apply ini settings
-        $this->setIniSettings();
-        $object = new $this->test_class( $this->getOptions() );
+        $this->callPrivateMethod( 'dateToTimestamp', array(
+            $date_time
+        ) );
+    }
 
-        $method = new \ReflectionMethod( $this->test_class, 'dateToTimestamp' );
-        $method->setAccessible( true );
-        $method->invoke( $object, $date_time );
+    /**
+     * @dataProvider providerIncorrectStringType
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectLovIdentifierException
+     */
+    public function testGetStandardLovIncorrectIdentifier( $incorrect_string )
+    {
+        $this->callPrivateMethod( 'getStandardLov', array(
+            new \stdClass(),
+            $incorrect_string
+        ) );
+    }
+
+    /**
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicLovDoesNotExistException
+     */
+    public function testGetStandardLovIncorrectLov()
+    {
+        $this->callPrivateMethod( 'getStandardLov', array(
+            new \stdClass(),
+            'some_string'
+        ) );
     }
 }

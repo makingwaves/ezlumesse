@@ -19,3 +19,5 @@ class HandlerLogicIncorrectXmlStringException extends \Exception {}
 class HandlerLogicIncorrectObjectIdException extends \Exception {}
 class HandlerLogicIncorrectDateFormatException extends \Exception {}
 class HandlerLogicIncorrectTimestampException extends \Exception {}
+class HandlerLogicIncorrectLovIdentifierException extends \Exception {}
+class HandlerLogicLovDoesNotExistException extends \Exception {}
