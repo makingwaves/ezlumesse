@@ -39,6 +39,11 @@ class HandlerLogic
     private $lang = 'nor-NO';
 
     /**
+     * Identifier on content class name
+     */
+    const CONTENT_CLASS_NAME = 'lumesse_offer';
+
+    /**
      * Default constructor
      */
     public function __construct( \SQLIImportHandlerOptions $options )
@@ -49,32 +54,35 @@ class HandlerLogic
         $this->lang = $this->getLanguage();
     }
 
+
+    /**
+     * Adding new object into database
+     *
+     * @param \stdClass $row
+     */
     private function addNewObject( \stdClass $row )
     {
-        $this->db->begin();
+        try {
+            $this->db->begin();
 
-        $object = \SQLIContent::create( new \SQLIContentOptions( array(
-            'class_identifier' => 'lumesse_offer',
-            'language' => $this->lang
-        ) ) );
+            $object = \SQLIContent::create( new \SQLIContentOptions( array(
+                'class_identifier' => self::CONTENT_CLASS_NAME,
+                'language' => $this->lang,
+                'remote_id' => $this->getRemoteId( $row )
+            ) ) );
 
-        $object->fields[$this->lang]->name = $row->jobTitle;
-        $object->fields[$this->lang]->url = $row->applicationUrl;
-        $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
-        $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
-        $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
-        $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
-        $object->fields[$this->lang]->schedule_type = $this->getStandardLov( $row, 'ScheduleType' );
-        $object->fields[$this->lang]->type_of_employment = $this->getStandardLov( $row, 'ContractType' );
+            $this->setObjectData( $object, $row );
 
-        $folder_publisher = \SQLIContentPublisher::getInstance();
-        $folder_publisher->setOptions( new \SQLIContentPublishOptions( array(
-            'parent_node_id' => $this->options->attribute( 'parent_node' )
-        ) ) );
+            $folder_publisher = \SQLIContentPublisher::getInstance();
+            $folder_publisher->setOptions( new \SQLIContentPublishOptions( array(
+                'parent_node_id' => $this->options->attribute( 'parent_node' )
+            ) ) );
 
-        $folder_publisher->publish( $object );
+            $folder_publisher->publish( $object );
 
-        $this->db->commit();
+            $this->db->commit();
+        }
+        catch( \Exception $e ) {}
     }
 
     /**
@@ -128,11 +136,12 @@ class HandlerLogic
     private function getAdPage( $page = 0, array $data = array() )
     {
         try {
-            $results = $this->soap->call( 'getAdvertisements', array(
+            $results = $this->soap->call( 'getAdvertisementById', array(
                  array(
-                    'firstResult' => $page,
-                    'maxResults' => $this->getMaxResults(),
-                    'langCode' => $this->getLumesseLanguage( $this->lang )
+                    //'firstResult' => $page,
+                    //'maxResults' => $this->getMaxResults(),
+                    //'langCode' => $this->getLumesseLanguage( $this->lang ),
+                     'postingTargetId' => 78
                 )
             ) );
 
@@ -263,6 +272,17 @@ class HandlerLogic
     }
 
     /**
+     * Method generates the remote id for given row
+     *
+     * @param \stdClass $row
+     * @return string
+     */
+    private function getRemoteId( \stdClass $row )
+    {
+        return md5( $row->applicationUrl . $row->siteLanguage );
+    }
+
+    /**
      * Returns a value of given standard lov identifier
      *
      * @param \stdClass $row
@@ -311,9 +331,39 @@ class HandlerLogic
         return $return;
     }
 
-    public function processRow( $row )
+    /**
+     * Processing given row
+     *
+     * @param \stdClass $row
+     */
+    public function processRow( \stdClass $row )
     {
-        $this->addNewObject( $row );
+        $object = \eZContentObject::fetchByRemoteID( $this->getRemoteId( $row ) );
+
+        if ( is_null( $object ) ) {
+            $this->addNewObject( $row );
+        }
+        else {
+            $this->updateExistingObject( $row );
+        }
+    }
+
+    /**
+     * Setting the object data by given remote data
+     *
+     * @param \SQLIContent $object
+     * @param \stdClass $row
+     */
+    private function setObjectData( \SQLIContent $object, \stdClass $row )
+    {
+        $object->fields[$this->lang]->name = $row->jobTitle;
+        $object->fields[$this->lang]->url = $row->applicationUrl;
+        $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
+        $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+        $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
+        $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
+        $object->fields[$this->lang]->schedule_type = $this->getStandardLov( $row, 'ScheduleType' );
+        $object->fields[$this->lang]->type_of_employment = $this->getStandardLov( $row, 'ContractType' );
     }
 
     /**
@@ -339,5 +389,46 @@ class HandlerLogic
         $document = $parser->process( html_entity_decode( $string, ENT_QUOTES, "UTF-8" ) );
 
         return \eZXMLTextType::domString( $document );
+    }
+
+    /**
+     * Method updates the content object of given row with row values
+     * @param \stdClass $row
+     */
+    private function updateExistingObject( \stdClass $row )
+    {
+        $content = \SQLIContent::fromRemoteID( $this->getRemoteId( $row ) );
+        $content->setOptions( new \SQLIContentOptions( array(
+            'language' => $this->lang
+        ) ) );
+
+        $this->setObjectData( $content, $row );
+
+        $publisher = \SQLIContentPublisher::getInstance();
+        $publisher->publish( $content );
+    }
+
+    public function unpublishObsoleteAds()
+    {
+        $results = $this->fetchAllPublishedAds();
+        print '<pre>';
+        var_dump($results);
+        print '</pre>';
+    }
+
+    /**
+     * @return null
+     */
+    private function fetchAllPublishedAds()
+    {
+        $results = \eZFunctionHandler::execute( 'content', 'list', array(
+            'parent_node_id' => $this->options->attribute( 'parent_node' ),
+            'class_filter_type' => 'include',
+            'class_filter_array' => array(
+                self::CONTENT_CLASS_NAME
+            )
+        ) );
+
+        return $results;
     }
 }

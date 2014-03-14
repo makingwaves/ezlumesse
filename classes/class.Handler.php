@@ -69,7 +69,7 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function cleanup()
     {
-
+        $this->handler_logic->unpublishObsoleteAds();
     }
 
     /**
@@ -97,6 +97,6 @@ class Handler extends \SQLIImportAbstractHandler implements \ISQLIImportHandler
      */
     public function getProgressionNotes()
     {
-
+        return '';
     }
 } 
