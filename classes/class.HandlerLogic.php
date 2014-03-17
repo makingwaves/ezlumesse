@@ -39,6 +39,25 @@ class HandlerLogic
     private $lang = 'nor-NO';
 
     /**
+     * Contains the mapping of Lumesse Lovs attributes
+     * @var array
+     */
+    private $lovs_data = array(
+        'standard' => array(
+            'first_level' => 'standardLovs',
+            'second_level' => 'standardLov'
+        ),
+        'custom' => array(
+            'first_level' => 'customLovs',
+            'second_level' => 'customLov'
+        ),
+        'configurable' => array(
+            'first_level' => 'configurableFields',
+            'second_level' => 'configurableField'
+        )
+    );
+
+    /**
      * Identifier on content class name
      */
     const CONTENT_CLASS_NAME = 'lumesse_offer';
@@ -284,26 +303,51 @@ class HandlerLogic
      * Returns a value of given standard lov identifier
      *
      * @param \stdClass $row
-     * @param $identifier
-     * @return mixed
+     * @param string $identifier
+     * @param string $lov_type
+     * @return string
      * @throws HandlerLogicIncorrectLovIdentifierException
      * @throws HandlerLogicLovDoesNotExistException
+     * @throws HandlerLogicIncorrectLovTypeException
      */
-    private function getStandardLov( \stdClass $row, $identifier )
+    private function getLov( \stdClass $row, $identifier, $lov_type = 'standard' )
     {
+        if ( !array_key_exists( $lov_type, $this->lovs_data ) ) {
+            throw new HandlerLogicIncorrectLovTypeException();
+        }
+
         if ( !is_string( $identifier ) ) {
             throw new HandlerLogicIncorrectLovIdentifierException();
         }
 
-        if ( isset( $row->standardLovs ) ) {
-            foreach( $row->standardLovs->standardLov as $item ) {
-                if ( $item->value === $identifier && isset( $item->criteria->criterion->label ) ) {
-                    return $item->criteria->criterion->label;
+        if ( isset( $row->{$this->lovs_data[$lov_type]['first_level']} ) ) {
+
+            // second level contains multiple entries
+            if ( is_array( $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']} ) ) {
+
+                foreach( $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']} as $item ) {
+
+                    if ( isset( $item->value ) && $item->value === $identifier ) {
+
+                        if ( isset( $item->criteria->criterion->label ) ) {
+                            return $item->criteria->criterion->label;
+                        }
+                    }
+                }
+            }
+            // second level is a single entry
+            elseif ( $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']} instanceof \stdClass ) {
+
+                if ( $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']}->value === $identifier ) {
+
+                    if ( isset( $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']}->criteria->criterion->label ) ) {
+                        return $row->{$this->lovs_data[$lov_type]['first_level']}->{$this->lovs_data[$lov_type]['second_level']}->criteria->criterion->label;
+                    }
                 }
             }
         }
 
-        throw new HandlerLogicLovDoesNotExistException();
+        return '';
     }
 
     /**
@@ -360,8 +404,12 @@ class HandlerLogic
         $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
         $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
         $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
-        $object->fields[$this->lang]->schedule_type = $this->getStandardLov( $row, 'ScheduleType' );
-        $object->fields[$this->lang]->type_of_employment = $this->getStandardLov( $row, 'ContractType' );
+        $object->fields[$this->lang]->schedule_type = $this->getLov( $row, 'ScheduleType' );
+        $object->fields[$this->lang]->type_of_employment = $this->getLov( $row, 'ContractType' );
+        $object->fields[$this->lang]->city = isset( $row->location ) ? $row->location : '';
+        $object->fields[$this->lang]->region = $this->getLov( $row, 'Regioner', 'custom' );
+        $object->fields[$this->lang]->country = $this->getLov( $row, 'Country1', 'custom' );
+        $object->fields[$this->lang]->address = $this->getLov( $row, 'Administrativt', 'configurable' );
     }
 
     /**

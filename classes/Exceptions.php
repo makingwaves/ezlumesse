@@ -20,4 +20,4 @@ class HandlerLogicIncorrectObjectIdException extends \Exception {}
 class HandlerLogicIncorrectDateFormatException extends \Exception {}
 class HandlerLogicIncorrectTimestampException extends \Exception {}
 class HandlerLogicIncorrectLovIdentifierException extends \Exception {}
-class HandlerLogicLovDoesNotExistException extends \Exception {}
+class HandlerLogicIncorrectLovTypeException extends \Exception {}

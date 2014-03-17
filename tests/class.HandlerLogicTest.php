@@ -300,22 +300,23 @@ class HandlerLogicTest extends EzLumesseTests
      * @dataProvider providerIncorrectStringType
      * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectLovIdentifierException
      */
-    public function testGetStandardLovIncorrectIdentifier( $incorrect_string )
+    public function testGetLovIncorrectIdentifier( $incorrect_string )
     {
-        $this->callPrivateMethod( 'getStandardLov', array(
+        $this->callPrivateMethod( 'getLov', array(
             new \stdClass(),
             $incorrect_string
         ) );
     }
 
     /**
-     * @expectedException \MakingWaves\eZLumesse\HandlerLogicLovDoesNotExistException
+     * @expectedException \MakingWaves\eZLumesse\HandlerLogicIncorrectLovTypeException
      */
-    public function testGetStandardLovIncorrectLov()
+    public function testGetLovIncorrectLovType()
     {
-        $this->callPrivateMethod( 'getStandardLov', array(
+        $this->callPrivateMethod( 'getLov', array(
             new \stdClass(),
-            'some_string'
+            'some_string',
+            'not_existing_lov_type'
         ) );
     }
 
