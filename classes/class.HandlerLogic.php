@@ -136,12 +136,11 @@ class HandlerLogic
     private function getAdPage( $page = 0, array $data = array() )
     {
         try {
-            $results = $this->soap->call( 'getAdvertisementById', array(
+            $results = $this->soap->call( 'getAdvertisements', array(
                  array(
-                    //'firstResult' => $page,
-                    //'maxResults' => $this->getMaxResults(),
-                    //'langCode' => $this->getLumesseLanguage( $this->lang ),
-                     'postingTargetId' => 78
+                    'firstResult' => $page,
+                    'maxResults' => $this->getMaxResults(),
+                    'langCode' => $this->getLumesseLanguage( $this->lang )
                 )
             ) );
 
@@ -161,7 +160,6 @@ class HandlerLogic
             if ( $this->nextPageExists( $page, $this->getMaxResults(), $this->getProcessLength( $results ) ) ) {
                 $data = $this->getAdPage( $page + $this->getMaxResults(), $data );
             }
-
         }
         catch( \Exception $e ) {
             $data = array();
@@ -402,22 +400,48 @@ class HandlerLogic
             'language' => $this->lang
         ) ) );
 
+        $this->unhideNodes( $content->attribute( 'id' ) );
         $this->setObjectData( $content, $row );
 
         $publisher = \SQLIContentPublisher::getInstance();
         $publisher->publish( $content );
     }
 
-    public function unpublishObsoleteAds()
+    /**
+     * Method works in case of Lumesse maintenance. After server is back, all fetched offers are unhided.
+     * @param int $object_id
+     */
+    private function unhideNodes( $object_id )
     {
-        $results = $this->fetchAllPublishedAds();
-        print '<pre>';
-        var_dump($results);
-        print '</pre>';
+        $all_nodes = \eZContentObjectTreeNode::fetchByContentObjectID( $object_id );
+        foreach( $all_nodes as $node ) {
+            \eZContentObjectTreeNode::unhideSubTree( $node );
+        }
     }
 
     /**
-     * @return null
+     * Method hides all the nodes which are not connected with currently fetched data
+     */
+    public function unpublishObsoleteAds()
+    {
+        $results = $this->fetchAllPublishedAds();
+        $current_objects = array();
+
+        foreach( $this->data as $item ) {
+            $current_objects[] = $this->getRemoteId( $item );
+        }
+
+        foreach( $results as $node ) {
+
+            if ( !in_array( $node->ContentObject->attribute( 'remote_id' ), $current_objects ) ) {
+                \eZContentObjectTreeNode::hideSubTree( $node );
+            }
+        }
+    }
+
+    /**
+     * Returns all published lumesse offers
+     * @return array
      */
     private function fetchAllPublishedAds()
     {
@@ -426,8 +450,13 @@ class HandlerLogic
             'class_filter_type' => 'include',
             'class_filter_array' => array(
                 self::CONTENT_CLASS_NAME
-            )
+            ),
+            'language' => $this->lang
         ) );
+
+        if ( !is_array( $results ) ) {
+            $results = array();
+        }
 
         return $results;
     }

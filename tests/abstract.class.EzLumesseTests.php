@@ -24,12 +24,17 @@ abstract class EzLumesseTests extends \ezpDatabaseTestCase
     }
 
     /**
+     * @param array $additional_values - key value pairs
      * @return \SQLIImportHandlerOptions
      */
-    protected function getOptions()
+    protected function getOptions( $additional_values = array() )
     {
         $options = new \SQLIImportHandlerOptions();
         $options->test = 'test_value';
+
+        foreach( $additional_values as $key => $value ) {
+            $options->$key = $value;
+        }
 
         return $options;
     }

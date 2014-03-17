@@ -318,4 +318,24 @@ class HandlerLogicTest extends EzLumesseTests
             'some_string'
         ) );
     }
+
+    public function testFetchAllPublishedAds()
+    {
+        $options = new \ReflectionProperty( $this->test_class, 'options' );
+        $options->setAccessible( true );
+
+        // apply ini settings
+        $this->setIniSettings();
+        $object = new $this->test_class( $this->getOptions( array(
+            'parent_node' => 1
+        ) ) );
+
+        $method = new \ReflectionMethod( $this->test_class, 'FetchAllPublishedAds' );
+        $method->setAccessible( true );
+        $result = $method->invoke( $object );
+
+        $this->assertTrue( is_array( $result ) );
+
+        return $object;
+    }
 }
