@@ -307,7 +307,6 @@ class HandlerLogic
      * @param string $lov_type
      * @return string
      * @throws HandlerLogicIncorrectLovIdentifierException
-     * @throws HandlerLogicLovDoesNotExistException
      * @throws HandlerLogicIncorrectLovTypeException
      */
     private function getLov( \stdClass $row, $identifier, $lov_type = 'standard' )
@@ -331,6 +330,18 @@ class HandlerLogic
 
                         if ( isset( $item->criteria->criterion->label ) ) {
                             return $item->criteria->criterion->label;
+                        }
+                        elseif ( is_array( $item->criteria->criterion ) ) {
+
+                            $return_data = array();
+                            foreach( $item->criteria->criterion as $criterion ) {
+                                $return_data[] = join( ': ', array(
+                                    $criterion->label,
+                                    $criterion->value
+                                ) );
+                            }
+
+                            return join( ', ', $return_data );
                         }
                     }
                 }
@@ -410,6 +421,8 @@ class HandlerLogic
         $object->fields[$this->lang]->region = $this->getLov( $row, 'Regioner', 'custom' );
         $object->fields[$this->lang]->country = $this->getLov( $row, 'Country1', 'custom' );
         $object->fields[$this->lang]->address = $this->getLov( $row, 'Administrativt', 'configurable' );
+        $object->fields[$this->lang]->contact_person = $this->getLov( $row, 'ContactPerson', 'configurable' );
+
     }
 
     /**
