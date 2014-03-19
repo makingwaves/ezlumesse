@@ -1,5 +1,5 @@
-eZLumesse
-=========
+eZLumesse 1.0
+=============
 
 Script
 ======
