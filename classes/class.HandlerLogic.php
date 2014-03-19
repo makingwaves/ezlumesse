@@ -422,7 +422,7 @@ class HandlerLogic
         $object->fields[$this->lang]->country = $this->getLov( $row, 'Country1', 'custom' );
         $object->fields[$this->lang]->address = $this->getLov( $row, 'Administrativt', 'configurable' );
         $object->fields[$this->lang]->contact_person = $this->getLov( $row, 'ContactPerson', 'configurable' );
-
+        $object->fields[$this->lang]->recruiting_company = isset( $row->recruitingCompany ) ? $row->recruitingCompany : '';
     }
 
     /**

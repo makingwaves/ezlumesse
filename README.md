@@ -1,6 +1,11 @@
 eZLumesse
 =========
 
+Script
+======
+An example how to run the import script:
+``php extension/sqliimport/bin/php/sqlidoimport.php -ssuperadmin_orkla_no --source-handlers=ezlumesse --options="ezlumesse::parent_node=81860"``
+
 eZLumesse - development
 =======================
 
