@@ -156,7 +156,7 @@ class HandlerLogic
     {
         try {
             $results = $this->soap->call( 'getAdvertisements', array(
-                 array(
+                array(
                     'firstResult' => $page,
                     'maxResults' => $this->getMaxResults(),
                     'langCode' => $this->getLumesseLanguage( $this->lang )
@@ -422,7 +422,7 @@ class HandlerLogic
         $object->fields[$this->lang]->country = $this->getLov( $row, 'Country1', 'custom' );
         $object->fields[$this->lang]->address = $this->getLov( $row, 'Administrativt', 'configurable' );
         $object->fields[$this->lang]->contact_person = $this->getLov( $row, 'ContactPerson', 'configurable' );
-        $object->fields[$this->lang]->recruiting_company = isset( $row->recruitingCompany ) ? $row->recruitingCompany : '';
+        $object->fields[$this->lang]->company_name = isset( $row->organizations->organization[0]->value ) ? $row->organizations->organization[0]->value : '';
     }
 
     /**
@@ -439,11 +439,11 @@ class HandlerLogic
         if( !is_string( $string ) ) {
             throw new HandlerLogicIncorrectXmlStringException();
         }
-        
+
         if ( ( !is_int( $object_id ) && !filter_var( $object_id, FILTER_VALIDATE_INT ) ) || $object_id <= 0 ) {
             throw new HandlerLogicIncorrectObjectIdException();
         }
-        
+
         $parser = new \eZSimplifiedXMLInputParser( $object_id, \eZXMLInputParser::ERROR_SYNTAX, \eZXMLInputParser::ERROR_ALL, true );
         $document = $parser->process( html_entity_decode( $string, ENT_QUOTES, "UTF-8" ) );
 
