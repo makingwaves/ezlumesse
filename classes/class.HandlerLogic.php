@@ -411,8 +411,14 @@ class HandlerLogic
     {
         $object->fields[$this->lang]->name = $row->jobTitle;
         $object->fields[$this->lang]->url = $row->applicationUrl;
-        $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
-        $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+        if ( isset( $row->customFields->customField[0] ) )
+        {
+            $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
+        }
+        if ( isset( $row->customFields->customField[1] ) )
+            {
+                $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+        }
         $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
         $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
         $object->fields[$this->lang]->schedule_type = $this->getLov( $row, 'ScheduleType' );
