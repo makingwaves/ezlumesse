@@ -492,16 +492,13 @@ class HandlerLogic
     public function unpublishObsoleteAds()
     {
         $results = $this->fetchAllPublishedAds();
-        $current_objects = array();
 
-        foreach( $this->data as $item ) {
-            $current_objects[] = $this->getRemoteId( $item );
-        }
+        foreach( $results as $result ) {
 
-        foreach( $results as $node ) {
+            $offer_wrapper = new OfferWrapper( $result );
 
-            if ( !in_array( $node->ContentObject->attribute( 'remote_id' ), $current_objects ) ) {
-                \eZContentObjectTreeNode::hideSubTree( $node );
+            if ( $offer_wrapper->checkUrlExistance() === false ) {
+                $offer_wrapper->hide();
             }
         }
     }
