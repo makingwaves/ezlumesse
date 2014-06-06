@@ -416,8 +416,8 @@ class HandlerLogic
             $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
         }
         if ( isset( $row->customFields->customField[1] ) )
-            {
-                $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+        {
+            $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
         }
         $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
         $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
@@ -449,6 +449,15 @@ class HandlerLogic
         if ( ( !is_int( $object_id ) && !filter_var( $object_id, FILTER_VALIDATE_INT ) ) || $object_id <= 0 ) {
             throw new HandlerLogicIncorrectObjectIdException();
         }
+
+        $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
+        // in case when needed, decorate the string with paragrapg
+        if( strpos( $string, '<p>' ) !== 0 ) {
+            $string = '<p>' . $string . '</p>';
+        }
+        // replace double br's with close and open tag for paragraph
+        $string = str_replace( '<br /><br />', '</p><p>', $string );
+
 
         $parser = new \eZSimplifiedXMLInputParser( $object_id, \eZXMLInputParser::ERROR_SYNTAX, \eZXMLInputParser::ERROR_ALL, true );
         $document = $parser->process( html_entity_decode( $string, ENT_QUOTES, "UTF-8" ) );
