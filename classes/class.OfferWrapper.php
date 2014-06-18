@@ -95,7 +95,14 @@ class OfferWrapper
 
         if( is_array( $forbidden_sites ) ) {
 
-            $contains_errors = in_array( $response_info['url'], $forbidden_sites );
+            foreach( $forbidden_sites as $site ) {
+
+                if ( strpos( $response_info['url'], $site ) > -1 ) {
+
+                    $contains_errors = true;
+                    break;
+                }
+            }
         }
 
         return $contains_errors;

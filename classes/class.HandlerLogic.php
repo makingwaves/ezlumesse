@@ -451,7 +451,7 @@ class HandlerLogic
         }
 
         $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
-        // in case when needed, decorate the string with paragrapg
+        // in case when needed, decorate the string with paragraph
         if( strpos( $string, '<p>' ) !== 0 ) {
             $string = '<p>' . $string . '</p>';
         }
