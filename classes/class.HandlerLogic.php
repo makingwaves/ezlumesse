@@ -391,6 +391,7 @@ class HandlerLogic
      */
     public function processRow( \stdClass $row )
     {
+
         $object = \eZContentObject::fetchByRemoteID( $this->getRemoteId( $row ) );
 
         if ( is_null( $object ) ) {
@@ -409,16 +410,22 @@ class HandlerLogic
      */
     private function setObjectData( \SQLIContent $object, \stdClass $row )
     {
+
         $object->fields[$this->lang]->name = $row->jobTitle;
         $object->fields[$this->lang]->url = $row->applicationUrl;
-        if ( isset( $row->customFields->customField[0] ) )
+
+        $object->fields[$this->lang]->company_info = '';
+        if ( ! is_null($row->customFields->customField[0]->value ) )
         {
-            $object->fields[$this->lang]->company_info = $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
+            $object->fields[$this->lang]->company_info =  $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
         }
-        if ( isset( $row->customFields->customField[1] ) )
+
+        $object->fields[$this->lang]->job_info = '';
+        if ( ! is_null($row->customFields->customField[1]->value ) )
         {
-            $object->fields[$this->lang]->job_info = $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+            $object->fields[$this->lang]->job_info =  $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
         }
+
         $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
         $object->fields[$this->lang]->deadline = $this->dateToTimestamp( $row->postingEndDate );
         $object->fields[$this->lang]->schedule_type = $this->getLov( $row, 'ScheduleType' );
@@ -451,7 +458,7 @@ class HandlerLogic
         }
 
         $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
-        // in case when needed, decorate the string with paragraph
+        // in case when needed, decorate the string with paragrapg
         if( strpos( $string, '<p>' ) !== 0 ) {
             $string = '<p>' . $string . '</p>';
         }
