@@ -465,6 +465,11 @@ class HandlerLogic
         // replace double br's with close and open tag for paragraph
         $string = str_replace( '<br /><br />', '</p><p>', $string );
 
+        $string = str_replace( '<strong>', '<br /><strong>', $string );
+        $string = str_replace( '</strong>', '</strong><br />', $string );
+        $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
+        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
+
 
         $parser = new \eZSimplifiedXMLInputParser( $object_id, \eZXMLInputParser::ERROR_SYNTAX, \eZXMLInputParser::ERROR_ALL, true );
         $document = $parser->process( html_entity_decode( $string, ENT_QUOTES, "UTF-8" ) );
