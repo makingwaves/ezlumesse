@@ -459,10 +459,14 @@ class HandlerLogic
             throw new HandlerLogicIncorrectObjectIdException();
         }
 
+
+        $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
+
         $string = strip_tags ($string, '<a><b><strong><p>');
         $string = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $string);
         $string = preg_replace('/(<[^>]+) class=".*?"/i', '$1', $string);
 
+        /*
         $tidy = new \Tidy();
         $config = array(
             'input-encoding' => 'utf8',
@@ -474,9 +478,10 @@ class HandlerLogic
         $tidy->parseString($string, $config);
         $tidy->cleanRepair();
         $string = $tidy->value;
+        */
 
-//        $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
-//        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
+        $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
+        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
 //        $string = str_replace("&", "&amp;", $string);
 
         $parser = new \eZSimplifiedXMLInputParser($object_id);
