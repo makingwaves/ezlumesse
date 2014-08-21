@@ -181,6 +181,8 @@ class HandlerLogic
             }
         }
         catch( \Exception $e ) {
+//            die('cant establish connection');
+//            print_r($e);
             $data = array();
         }
 
@@ -457,24 +459,31 @@ class HandlerLogic
             throw new HandlerLogicIncorrectObjectIdException();
         }
 
-        $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
-        // in case when needed, decorate the string with paragrapg
-        if( strpos( $string, '<p>' ) !== 0 ) {
-            $string = '<p>' . $string . '</p>';
-        }
-        // replace double br's with close and open tag for paragraph
-        $string = str_replace( '<br /><br />', '</p><p>', $string );
+        $string = strip_tags ($string, '<a><b><strong><p>');
+        $string = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $string);
+        $string = preg_replace('/(<[^>]+) class=".*?"/i', '$1', $string);
 
-        $string = str_replace( '<strong>', '<br /><strong>', $string );
-        $string = str_replace( '</strong>', '</strong><br />', $string );
-        $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
-        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
+        $tidy = new \Tidy();
+        $config = array(
+            'input-encoding' => 'utf8',
+            'indent'     => true,
+            'clean'     => true,
+            'input-xml'  => true,
+            'output-xhtml' => true,
+            'wrap'       => false);
+        $tidy->parseString($string, $config);
+        $tidy->cleanRepair();
+        $string = $tidy->value;
 
+//        $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
+//        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
+//        $string = str_replace("&", "&amp;", $string);
 
-        $parser = new \eZSimplifiedXMLInputParser( $object_id, \eZXMLInputParser::ERROR_SYNTAX, \eZXMLInputParser::ERROR_ALL, true );
-        $document = $parser->process( html_entity_decode( $string, ENT_QUOTES, "UTF-8" ) );
+        $parser = new \eZSimplifiedXMLInputParser($object_id);
+        $xmlDocument = $parser->process($string);
+        $xml = \eZXMLTextType::domString($xmlDocument);
+        return $xml;;
 
-        return \eZXMLTextType::domString( $document );
     }
 
     /**
@@ -484,6 +493,8 @@ class HandlerLogic
     private function updateExistingObject( \stdClass $row )
     {
         $content = \SQLIContent::fromRemoteID( $this->getRemoteId( $row ) );
+        $content->addLocation( \SQLILocation::fromNodeID( $this->options->attribute('parent_node') ) );
+
         $content->setOptions( new \SQLIContentOptions( array(
             'language' => $this->lang
         ) ) );
