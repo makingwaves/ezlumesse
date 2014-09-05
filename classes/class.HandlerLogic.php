@@ -481,6 +481,8 @@ class HandlerLogic
         */
 
         $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
+        //$string = str_replace( "\n", '<br />&nbsp;<br />', $string );
+        $string = str_replace( "<strong></strong>", '', $string );
 //        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
 //        $string = str_replace("&", "&amp;", $string);
 
