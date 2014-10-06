@@ -459,14 +459,12 @@ class HandlerLogic
             throw new HandlerLogicIncorrectObjectIdException();
         }
 
-
         $string = html_entity_decode( $string, ENT_QUOTES, "UTF-8" );
 
         //$string = strip_tags ($string, '<a><b><strong><p>');
         $string = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $string);
         $string = preg_replace('/(<[^>]+) class=".*?"/i', '$1', $string);
 
-        /*
         $tidy = new \Tidy();
         $config = array(
             'input-encoding' => 'utf8',
@@ -478,13 +476,12 @@ class HandlerLogic
         $tidy->parseString($string, $config);
         $tidy->cleanRepair();
         $string = $tidy->value;
-        */
+
+        //jira: 43315-1786
+        $string = str_replace( '<a href="mailto:agneta..stenberg@orklafoods.se">agneta.stenberg@orklafoods.se</a>', '<a href="mailto:agneta.stenberg@orklafoods.se">agneta.stenberg@orklafoods.se</a>', $string );
 
         $string = preg_replace( '/•[a-zA-Z]/', '• ', $string );
-        //$string = str_replace( "\n", '<br />&nbsp;<br />', $string );
-        $string = str_replace( "<strong></strong>", '', $string );
-//        $string = str_replace( "\n", '<br />&nbsp;<br />', $string );
-//        $string = str_replace("&", "&amp;", $string);
+        $string = preg_replace( "/<[^\/>]*>([\s]?)*<\/[^>]*>/", '', $string );
 
         $parser = new \eZSimplifiedXMLInputParser($object_id);
         $xmlDocument = $parser->process($string);
