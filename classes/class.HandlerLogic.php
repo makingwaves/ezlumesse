@@ -465,17 +465,17 @@ class HandlerLogic
         $string = preg_replace('/(<[^>]+) style=".*?"/i', '$1', $string);
         $string = preg_replace('/(<[^>]+) class=".*?"/i', '$1', $string);
 
-        $tidy = new \Tidy();
-        $config = array(
-            'input-encoding' => 'utf8',
-            'indent'     => true,
-            'clean'     => true,
-            'input-xml'  => true,
-            'output-xhtml' => true,
-            'wrap'       => false);
-        $tidy->parseString($string, $config);
-        $tidy->cleanRepair();
-        $string = $tidy->value;
+//        $tidy = new \Tidy();
+//        $config = array(
+//            'input-encoding' => 'utf8',
+//            'indent'     => true,
+//            'clean'     => true,
+//            'input-xml'  => true,
+//            'output-xhtml' => true,
+//            'wrap'       => false);
+//        $tidy->parseString($string, $config);
+//        $tidy->cleanRepair();
+//        $string = $tidy->value;
 
         //jira: 43315-1786
         $string = str_replace( '<a href="mailto:agneta..stenberg@orklafoods.se">agneta.stenberg@orklafoods.se</a>', '<a href="mailto:agneta.stenberg@orklafoods.se">agneta.stenberg@orklafoods.se</a>', $string );
