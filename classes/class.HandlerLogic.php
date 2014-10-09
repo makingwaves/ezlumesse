@@ -419,13 +419,13 @@ class HandlerLogic
         $object->fields[$this->lang]->company_info = '';
         if ( ! is_null($row->customFields->customField[0]->value ) )
         {
-            $object->fields[$this->lang]->company_info =  $this->stringToXmlblock( $row->customFields->customField[0]->value, $object->attribute( 'id' ) );
+            $object->fields[$this->lang]->company_info = $row->customFields->customField[0]->value;
         }
 
         $object->fields[$this->lang]->job_info = '';
         if ( ! is_null($row->customFields->customField[1]->value ) )
         {
-            $object->fields[$this->lang]->job_info =  $this->stringToXmlblock( $row->customFields->customField[1]->value, $object->attribute( 'id' ) );
+            $object->fields[$this->lang]->job_info = $row->customFields->customField[1]->value;
         }
 
         $object->fields[$this->lang]->commence = $this->dateToTimestamp( $row->postingStartDate );
