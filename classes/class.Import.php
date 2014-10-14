@@ -16,16 +16,26 @@ class Import
     {
         $this->cli = \eZCLI::instance();
         $this->cli->setUseStyles(true);
-        $this->loadSiteAccessesList();
+        $this->getSiteAccessesList();
     }
 
     /**
      * Load list of siteaccesses defined in ezlumesse.ini.
      */
-    private function loadSiteAccessesList()
+    private function getSiteAccessesList()
     {
         $ezLumesseConfig = \eZINI::instance('ezlumesse.ini');
         $this->siteAccesses = $ezLumesseConfig->BlockValues['ImportSiteaccesses']['SiteAccess'];
+    }
+
+    /**
+     * Get parent node defined in ezlumesse.ini.
+     * @return int
+     */
+    private function getParentNode()
+    {
+        $ezLumesseConfig = \eZINI::instance('ezlumesse.ini');
+        return $ezLumesseConfig->BlockValues['MainSettings']['JobOffersFolder'];
     }
 
     /**
@@ -52,8 +62,8 @@ class Import
      */
     public function executeSingleImport($siteAccess, $lang)
     {
-        $this->cli->warning('Import for ' . $siteAccess . ':' . $lang . ' started.');
-        exec('php extension/sqliimport/bin/php/sqlidoimport.php -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=84055,lang=' . $lang . '"');
+        $this->cli->warning('Import for ' . $siteAccess . ' - ' . $lang . ' started.');
+        exec('/usr/bin/php extension/sqliimport/bin/php/sqlidoimport.php -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=' . $this->getParentNode() . ',lang=' . $lang . '" >> /www/orkla/sites/www53/ezpublish_legacy/var/log/cronjob_logs/' .$siteAccess . '.log 2>&1');
     }
 }
 
