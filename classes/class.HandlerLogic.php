@@ -115,11 +115,11 @@ class HandlerLogic
     public function createLogFile( $action, $receivedData, $actionStatus = null )
     {
         if( $action == 'add' ) {
-            $jobOffer = "Action: ADD NEW \n";
+            $jobOffer = " \nAction: ADD NEW \n";
         } elseif( $action == 'update' ) {
-            $jobOffer = "Action: UPDATE \n";
+            $jobOffer = " \nAction: UPDATE \n";
         }
-        $jobOffer .= "Date: " . date( 'd-m-Y H:i:s' ) . "\n\n";
+        
         $jobOffer .= "ID: " . $receivedData->id . "\n";
         $jobOffer .= "Number: " . $receivedData->jobNumber . "\n";
         $jobOffer .= "Title: " . $receivedData->jobTitle . "\n\n";
