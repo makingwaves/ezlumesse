@@ -63,7 +63,7 @@ class Import
     public function executeSingleImport($siteAccess, $lang)
     {
         $this->cli->warning('Import for ' . $siteAccess . ' - ' . $lang . ' started.');
-        exec('/usr/bin/php extension/sqliimport/bin/php/sqlidoimport.php -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=' . $this->getParentNode() . ',lang=' . $lang . '" >> /www/orkla/sites/www53/ezpublish_legacy/var/log/cronjob_logs/' .$siteAccess . '.log 2>&1');
+        exec('/usr/bin/php extension/sqliimport/bin/php/sqlidoimport.php -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=' . $this->getParentNode() . ',lang=' . $lang . '"');
     }
 }
 

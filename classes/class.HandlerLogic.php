@@ -71,6 +71,7 @@ class HandlerLogic
         $this->options = $options;
         $this->db = \eZDB::instance();
         $this->lang = $this->getLanguage();
+
     }
 
 
@@ -81,6 +82,9 @@ class HandlerLogic
      */
     private function addNewObject( \stdClass $row )
     {
+
+
+        //file_put_contents('var/log/cronjob_logs/ezlumesse' . md5(rand(0,999)) . '.json', json_encode($this->data));
         try {
             $this->db->begin();
 
@@ -99,9 +103,61 @@ class HandlerLogic
 
             $folder_publisher->publish( $object );
 
-            $this->db->commit();
+            $commitResult = $this->db->commit();
+
+            $this->createLogFile('add', $row, $commitResult);
         }
         catch( \Exception $e ) {}
+    }
+
+    /**
+     * Method create log file after add new job offer object or update existing.
+     * @param $action
+     * @param $receivedData
+     * @param $actionStatus
+     */
+    public function createLogFile( $action, $receivedData, $actionStatus )
+    {
+        if( $action == 'add' ) {
+            $jobOffer = "Action: ADD NEW \n";
+        } elseif( $action == 'update' ) {
+            $jobOffer = "Action: UPDATE \n";
+        }
+        $jobOffer .= "Date: " . date( 'd-m-Y H:i:s' ) . "\n\n";
+        $jobOffer .= "ID: " . $receivedData->id . "\n";
+        $jobOffer .= "Number: " . $receivedData->jobNumber . "\n";
+        $jobOffer .= "Title: " . $receivedData->jobTitle . "\n\n";
+        $jobOffer .= "URL: " . $receivedData->applicationUrl . "\n\n";
+        $jobOffer .= "City: " . isset( $receivedData->location ) ? $receivedData->location : '' . "\n\n";
+        $jobOffer .= "Company name: " . isset( $receivedData->organizations->organization[0]->value ) ? $receivedData->organizations->organization[0]->value : '' . "\n\n";
+        $jobOffer .= "Company info: " . $receivedData->customFields->customField[0]->value . "\n\n";
+        $jobOffer .= "Job info: " . $receivedData->customFields->customField[1]->value . "\n\n";
+        $jobOffer .= "Commence: " . $receivedData->postingStartDate . "\n";
+        $jobOffer .= "Deadline: " . $receivedData->postingEndDate . "\n";
+
+        if( $action == 'add' ) {
+            if( $actionStatus ) {
+                $jobOffer .= "Action status: success";
+            } else {
+                $jobOffer .= "Action status: failed";
+            }
+        }
+
+        $directory = 'var/log/cronjob_logs/lumesse/' . date( 'd_m_y' ) . '/';
+
+        if (!file_exists( $directory )) {
+            mkdir( $directory, 0755, true );
+        }
+
+        $time = date( 'His' );
+
+        if($action == 'add') {
+            $filename = 'add_' . $time . '_' . strtolower(str_replace(' ', '_', $receivedData->jobNumber)) . '.log';
+        } elseif($action == 'update') {
+            $filename = 'update_' . $time . strtolower(str_replace(' ', '_', $receivedData->jobNumber)) . '.log';
+        }
+
+        file_put_contents( $directory . $filename, $jobOffer );
     }
 
     /**
@@ -412,7 +468,6 @@ class HandlerLogic
      */
     private function setObjectData( \SQLIContent $object, \stdClass $row )
     {
-
         $object->fields[$this->lang]->name = $row->jobTitle;
         $object->fields[$this->lang]->url = $row->applicationUrl;
 
@@ -508,6 +563,8 @@ class HandlerLogic
 
         $publisher = \SQLIContentPublisher::getInstance();
         $publisher->publish( $content );
+
+        $this->createLogFile('update', $row, $actionStatus);
     }
 
     /**
