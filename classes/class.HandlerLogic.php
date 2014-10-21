@@ -112,7 +112,7 @@ class HandlerLogic
      * @param $receivedData
      * @param $actionStatus
      */
-    public function createLogFile( $action, $receivedData, $actionStatus )
+    public function createLogFile( $action, $receivedData, $actionStatus = null )
     {
         if( $action == 'add' ) {
             $jobOffer = "Action: ADD NEW \n";
@@ -153,7 +153,7 @@ class HandlerLogic
             $filename = 'update_' . $time . strtolower(str_replace(' ', '_', $receivedData->jobNumber)) . '.log';
         }
 
-        \eZLog::write( $jobOffer, $filename, $directory );
+        \eZLog::write( $jobOffer, $filename, $directory);
     }
 
     /**
@@ -537,7 +537,7 @@ class HandlerLogic
         $parser = new \eZSimplifiedXMLInputParser($object_id);
         $xmlDocument = $parser->process($string);
         $xml = \eZXMLTextType::domString($xmlDocument);
-        return $xml;;
+        return $xml;
 
     }
 
@@ -560,7 +560,7 @@ class HandlerLogic
         $publisher = \SQLIContentPublisher::getInstance();
         $publisher->publish( $content );
 
-        $this->createLogFile('update', $row, $actionStatus);
+        $this->createLogFile('update', $row);
     }
 
     /**
