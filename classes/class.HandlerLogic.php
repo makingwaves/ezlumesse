@@ -153,7 +153,7 @@ class HandlerLogic
             $filename = 'update_' . $time . strtolower(str_replace(' ', '_', $receivedData->jobNumber)) . '.log';
         }
 
-        file_put_contents( $directory . $filename, $jobOffer );
+        \eZLog::write( $jobOffer, $filename, $directory );
     }
 
     /**
