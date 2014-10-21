@@ -71,7 +71,6 @@ class HandlerLogic
         $this->options = $options;
         $this->db = \eZDB::instance();
         $this->lang = $this->getLanguage();
-
     }
 
 
@@ -82,9 +81,6 @@ class HandlerLogic
      */
     private function addNewObject( \stdClass $row )
     {
-
-
-        //file_put_contents('var/log/cronjob_logs/ezlumesse' . md5(rand(0,999)) . '.json', json_encode($this->data));
         try {
             $this->db->begin();
 
