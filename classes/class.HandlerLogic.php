@@ -119,7 +119,7 @@ class HandlerLogic
         } elseif( $action == 'update' ) {
             $jobOffer = " \nAction: UPDATE \n";
         }
-        
+
         $jobOffer .= "ID: " . $receivedData->id . "\n";
         $jobOffer .= "Number: " . $receivedData->jobNumber . "\n";
         $jobOffer .= "Title: " . $receivedData->jobTitle . "\n\n";
@@ -140,10 +140,6 @@ class HandlerLogic
         }
 
         $directory = 'var/log/cronjob_logs/lumesse/' . date( 'd_m_y' ) . '/';
-
-        if (!file_exists( $directory )) {
-            mkdir( $directory, 0755, true );
-        }
 
         $time = date( 'His' );
 
