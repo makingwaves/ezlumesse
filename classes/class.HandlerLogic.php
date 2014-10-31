@@ -331,6 +331,21 @@ class HandlerLogic
                     if ( isset( $item->value ) && $item->value === $identifier ) {
 
                         if ( isset( $item->criteria->criterion->label ) ) {
+
+
+                            if ($identifier == 'ContactPerson')
+                            {
+                                $return_data = array();
+                                $return_data[] = join( ': ', array(
+                                    $item->criteria->criterion->label,
+                                    $item->criteria->criterion->value
+                                ) );
+
+                                $return_data[] = join( ': ', array('', '') );
+
+                                return join( ', ', $return_data );
+                            }
+
                             return $item->criteria->criterion->label;
                         }
                         elseif ( is_array( $item->criteria->criterion ) ) {
