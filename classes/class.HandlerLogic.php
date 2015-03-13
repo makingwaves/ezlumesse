@@ -453,7 +453,8 @@ class HandlerLogic
         $object->fields[$this->lang]->address = $this->getLov( $row, 'Administrativt', 'configurable' );
         $object->fields[$this->lang]->contact_person = $this->getLov( $row, 'ContactPerson', 'configurable' );
         $object->fields[$this->lang]->company_name = isset( $row->organizations->organization[0]->value ) ? $row->organizations->organization[0]->value : '';
-        $object->fields[$this->lang]->show_apply_link = 1;
+        $object->fields[$this->lang]->show_apply_link = $this->getLov( $row, 'Show apply link', 'custom' ) === 'No' ? 0 : 1;
+
     }
 
     /**
