@@ -9,6 +9,7 @@ namespace MakingWaves\eZLumesse;
  */
 class Import
 {
+    private $cmd = '';
     public $cli;
     public $siteAccesses;
 
@@ -50,6 +51,7 @@ class Import
                     $this->executeSingleImport($siteData[0], $siteData[1]);
                 }
             }
+            exec($this->cmd);
         } else {
             $this->cli->warning('Neither siteaccess is defined.');
         }
@@ -62,8 +64,7 @@ class Import
      */
     public function executeSingleImport($siteAccess, $lang)
     {
-        $this->cli->warning('Import for ' . $siteAccess . ' - ' . $lang . ' started.');
-        exec('/usr/bin/php extension/sqliimport/bin/php/sqlidoimport.php -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=' . $this->getParentNode() . ',lang=' . $lang . '" >> /www/orkla/sites/www53/ezpublish_legacy/var/log/cronjob_logs/' .$siteAccess . '.log 2>&1');
+        $this->cmd .= 'php extension/sqliimport/bin/php/sqlidoimport.php -q -s' . $siteAccess . ' --source-handlers=ezlumesse --options="ezlumesse::parent_node=' . $this->getParentNode() . ',lang=' . $lang . '";';
     }
 }
 
