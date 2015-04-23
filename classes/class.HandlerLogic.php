@@ -4,11 +4,6 @@ namespace MakingWaves\eZLumesse;
 class HandlerLogic
 {
     /**
-     * @var Soap
-     */
-    private $soap;
-
-    /**
      * @var int
      */
     private $max_results = null;
@@ -32,11 +27,6 @@ class HandlerLogic
      * @var \eZDB
      */
     private $db;
-
-    /**
-     * @var string
-     */
-    private $lang = 'nor-NO';
 
     /**
      * Contains the mapping of Lumesse Lovs attributes
@@ -67,10 +57,11 @@ class HandlerLogic
      */
     public function __construct( \SQLIImportHandlerOptions $options )
     {
-        $this->soap = new Soap();
+        $ezLumesseConfig = \eZINI::instance('ezlumesse.ini');
         $this->options = $options;
         $this->db = \eZDB::instance();
         $this->lang = $this->getLanguage();
+        $this->siteAccesses = $ezLumesseConfig->BlockValues['ImportSiteaccesses']['SiteAccess'];
     }
 
 
@@ -154,36 +145,47 @@ class HandlerLogic
      */
     private function getAdPage( $page = 0, array $data = array() )
     {
+
         try {
-            $results = $this->soap->call( 'getAdvertisements', array(
-                array(
-                    'firstResult' => $page,
-                    'maxResults' => $this->getMaxResults(),
-                    'langCode' => $this->getLumesseLanguage( $this->lang )
-                )
-            ) );
 
-            $advertisements = array();
-            if ( isset( $results->advertisementResult->advertisements->advertisement ) ) {
+            foreach ($this->siteAccesses as $site) {
 
-                if ( is_array( $results->advertisementResult->advertisements->advertisement ) ) {
-                    $advertisements = $results->advertisementResult->advertisements->advertisement;
+                //get language from settings
+                $siteSpec = explode(',', $site);
+                $lang = $siteSpec[3];
+
+                $this->soap = new Soap( $site );
+                $results = $this->soap->call( 'getAdvertisements', array(
+                    array(
+                        'firstResult' => $page,
+                        'maxResults' => $this->getMaxResults(),
+                        'langCode' => $this->getLumesseLanguage( $lang )
+                    )
+                ) );
+
+                $advertisements = array();
+                if ( isset( $results->advertisementResult->advertisements->advertisement ) ) {
+
+                    if ( is_array( $results->advertisementResult->advertisements->advertisement ) ) {
+                        $advertisements = $results->advertisementResult->advertisements->advertisement;
+                    }
+                    elseif( $results->advertisementResult->advertisements->advertisement instanceof \stdClass ) {
+                        $advertisements[] = $results->advertisementResult->advertisements->advertisement;
+                    }
                 }
-                elseif( $results->advertisementResult->advertisements->advertisement instanceof \stdClass ) {
-                    $advertisements[] = $results->advertisementResult->advertisements->advertisement;
+
+                $data = array_merge( $data, $advertisements );
+
+                if ( $this->nextPageExists( $page, $this->getMaxResults(), $this->getProcessLength( $results ) ) ) {
+                    $data = $this->getAdPage( $page + $this->getMaxResults(), $data );
                 }
-            }
-
-            $data = array_merge( $data, $advertisements );
-
-            if ( $this->nextPageExists( $page, $this->getMaxResults(), $this->getProcessLength( $results ) ) ) {
-                $data = $this->getAdPage( $page + $this->getMaxResults(), $data );
+                unset($soap);
             }
         }
         catch( \Exception $e ) {
-//            die('cant establish connection');
+            die('cant establish connection');
 //            print_r($e);
-            $data = array();
+//            $data = array();
         }
 
         return $data;

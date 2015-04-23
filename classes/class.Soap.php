@@ -40,10 +40,16 @@ class Soap
     private $handler = null;
 
     /**
+     * @var array
+     */
+    private $site = null;
+
+    /**
      * Default constructor
      */
-    public function __construct()
+    public function __construct($site)
     {
+        $this->siteSpec = explode(',', $site);
         $this->loadSettings();
         $this->handler = $this->getConnectionHandler();
     }
@@ -79,12 +85,15 @@ class Soap
         if ( $environment === false ) {
             throw new SoapMissingEnvironmentException( 'Missing "UseEnvironment" value in INI settings' );
         }
-
+        //general
         $this->api_key = $ini->variable( 'MainSettings', 'ApiKey' );
         $this->api_endpoint = $ini->variable( 'MainSettings', 'Endpoint' );
         $this->namespace = $ini->variable( 'MainSettings', 'Namespace' );
-        $this->username = $ini->variable( $environment . '-Environment', 'UserName' );
-        $this->password = $ini->variable( $environment . '-Environment', 'Password' );
+
+        //SA specific
+        $this->username = $this->siteSpec[1];
+        $this->password = $this->siteSpec[2];
+
     }
 
     /**
