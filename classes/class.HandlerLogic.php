@@ -29,6 +29,11 @@ class HandlerLogic
     private $db;
 
     /**
+     * @var string
+     */
+    private $lang = 'nor-NO';
+
+    /**
      * Contains the mapping of Lumesse Lovs attributes
      * @var array
      */
@@ -415,9 +420,11 @@ class HandlerLogic
 
         if ( is_null( $object ) ) {
             $this->addNewObject( $row );
+            echo "NEW\n";
         }
         else {
             $this->updateExistingObject( $row );
+            echo "UPDATE\n";
         }
     }
 
