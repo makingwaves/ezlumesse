@@ -65,7 +65,7 @@ class HandlerLogic
         $ezLumesseConfig = \eZINI::instance('ezlumesse.ini');
         $this->options = $options;
         $this->db = \eZDB::instance();
-        $this->lang = $this->getLanguage();
+//        $this->lang = $this->getLanguage();
         $this->siteAccesses = $ezLumesseConfig->BlockValues['ImportSiteaccesses']['SiteAccess'];
     }
 
@@ -78,8 +78,9 @@ class HandlerLogic
     private function addNewObject( \stdClass $row )
     {
         try {
-            $this->db->begin();
 
+            $this->db->begin();
+            $this->lang = $this->getLumesseLanguage( $row->siteLanguage );
             $object = \SQLIContent::create( new \SQLIContentOptions( array(
                 'class_identifier' => self::CONTENT_CLASS_NAME,
                 'language' => $this->lang,
@@ -157,14 +158,14 @@ class HandlerLogic
 
                 //get language from settings
                 $siteSpec = explode(',', $site);
-                $lang = $siteSpec[3];
+                $this->lang = $siteSpec[3];
 
                 $this->soap = new Soap( $site );
                 $results = $this->soap->call( 'getAdvertisements', array(
                     array(
                         'firstResult' => $page,
                         'maxResults' => $this->getMaxResults(),
-                        'langCode' => $this->getLumesseLanguage( $lang )
+                        'langCode' => $this->getLumesseLanguage( $this->lang )
                     )
                 ) );
 
@@ -420,11 +421,9 @@ class HandlerLogic
 
         if ( is_null( $object ) ) {
             $this->addNewObject( $row );
-            echo "NEW\n";
         }
         else {
             $this->updateExistingObject( $row );
-            echo "UPDATE\n";
         }
     }
 

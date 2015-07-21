@@ -49,6 +49,9 @@ class Soap
      */
     public function __construct($site)
     {
+        sleep(1);
+        echo "Connecting: $site\n";
+
         $this->siteSpec = explode(',', $site);
         $this->loadSettings();
         $this->handler = $this->getConnectionHandler();
