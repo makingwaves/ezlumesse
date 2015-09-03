@@ -523,7 +523,7 @@ class HandlerLogic
     {
         $content = \SQLIContent::fromRemoteID( $this->getRemoteId( $row ) );
         $content->addLocation( \SQLILocation::fromNodeID( $this->options->attribute('parent_node') ) );
-
+        $this->lang = $this->getLumesseLanguage( $row->siteLanguage );
         $content->setOptions( new \SQLIContentOptions( array(
             'language' => $this->lang
         ) ) );
